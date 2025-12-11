@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Sudoku{% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <div class="game-header">
+        <h1>{{ difficulty|title }} lvl</h1>
+        <div class="game-stats">
+            <div class="stat">
+                <span class="stat-label">Time:</span>
+                <span id="timer">00:00</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Mistakes:</span>
+                <span id="mistakes-count" class="mistakes">0</span>/3
+            </div>
+            <div class="stat">
+                <span class="stat-label">Hints:</span>
+                <span id="hints-count">0</span>/3
+            </div>
+        </div>
+    </div>
+    
+    <div class="sudoku-board" id="sudoku-board"></div>
+    
+    <div class="number-pad">
+        {% for num in "123456789" %}
+            <button class="num-btn" data-num="{{ num }}">{{ num }}</button>
+        {% endfor %}
+        <button class="num-btn erase-btn" data-num="0">X</button>
+    </div>
+    
+    <div class="game-controls">
+        <button id="notes-btn" class="btn btn-secondary">Notes</button>
+        <button id="hint-btn" class="btn btn-secondary">Hint</button>
+        <a href="{% url 'home' %}" class="btn btn-outline">New</a>
+    </div>
+</div>
+
+<div id="success-modal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Victory</h2>
+        <p>Time: <span id="final-time"></span></p>
+        <p>Hints: <span id="final-hints"></span></p>
+        <div class="modal-buttons">
+            <a href="{% url 'home' %}" class="btn btn-primary">Play Again</a>
+            <a href="{% url 'leaderboard' %}" class="btn btn-secondary">Leaderboard</a>
+        </div>
+    </div>
+</div>
+
+<div id="game-over-modal" class="modal hidden">
+    <div class="modal-content game-over">
+        <h2>Defeat</h2>
+        <p>3 mistakes made</p>
+        <div class="modal-buttons">
+            <a href="{% url 'home' %}" class="btn btn-primary">Try Again</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const solution = {{ solution|safe }};
+    const difficulty = "{{ difficulty }}";
+    const puzzleData = {{ puzzle_json|safe }};
+</script>
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'js/sudoku.js' %}"></script>
+{% endblock %}

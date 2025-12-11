@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard - Sudoku{% endblock %}
+
+{% block content %}
+<div class="leaderboard-container">
+    <h1>Leaderboard</h1>
+    
+    <div class="difficulty-tabs">
+        <a href="{% url 'leaderboard' %}?difficulty=all" 
+           class="tab {% if current_difficulty == 'all' %}active{% endif %}">All</a>
+        <a href="{% url 'leaderboard' %}?difficulty=easy" 
+           class="tab {% if current_difficulty == 'easy' %}active{% endif %}">Easy</a>
+        <a href="{% url 'leaderboard' %}?difficulty=medium" 
+           class="tab {% if current_difficulty == 'medium' %}active{% endif %}">Medium</a>
+        <a href="{% url 'leaderboard' %}?difficulty=hard" 
+           class="tab {% if current_difficulty == 'hard' %}active{% endif %}">Hard</a>
+    </div>
+    
+    <table class="leaderboard-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th>Difficulty</th>
+                <th>Time</th>
+                <th>Hints</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ result.user.username }}</td>
+                <td>{{ result.difficulty|title }}</td>
+                <td>{{ result.time_seconds|floatformat:0 }}s</td>
+                <td>{{ result.hints_used }}</td>
+                <td>{{ result.created_at|date:"d.m.Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="no-results">No results yet. Be the first to complete a puzzle!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Sudoku - Home{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <h1>Welcome to Sudoku!</h1>
+    <p class="subtitle">Challenge your mind with the classic puzzle game</p>
+    
+    {% if user.is_authenticated %}
+        <div class="difficulty-selector">
+            <h2>Choose Difficulty</h2>
+            <div class="difficulty-buttons">
+                <a href="{% url 'game' %}?difficulty=easy" class="btn btn-easy">Easy</a>
+                <a href="{% url 'game' %}?difficulty=medium" class="btn btn-medium">Medium</a>
+                <a href="{% url 'game' %}?difficulty=hard" class="btn btn-hard">Hard</a>
+            </div>
+        </div>
+        
+        <div class="quick-links">
+            <a href="{% url 'leaderboard' %}" class="link-card">
+                <h3>Leaderboard</h3>
+                <p>See the best players</p>
+            </a>
+            <a href="{% url 'chat' %}" class="link-card">
+                <h3>Chat</h3>
+                <p>Talk with other players</p>
+            </a>
+        </div>
+    {% else %}
+        <div class="auth-prompt">
+            <p>Sign in to start playing and compete on the leaderboard!</p>
+            <div class="auth-buttons">
+                <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+                <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

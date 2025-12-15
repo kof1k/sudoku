@@ -278,138 +278,13 @@ sudo -u sudoku ./venv/bin/python manage.py migrate
 sudo -u sudoku ./venv/bin/python manage.py collectstatic --noinput
 ```
 
-### Step 9: Configure Gunicorn with Supervisor
 
-Create Gunicorn config:
-```bash
-sudo nano /etc/supervisor/conf.d/sudoku.conf
-```
 
-Add:
-```ini
-[program:sudoku]
-command=/var/www/sudoku/venv/bin/gunicorn --workers 3 --bind unix:/var/www/sudoku/sudoku.sock django_project.wsgi:application
-directory=/var/www/sudoku
-user=sudoku
-autostart=true
-autorestart=true
-redirect_stderr=true
-stdout_logfile=/var/log/sudoku/gunicorn.log
-environment=DATABASE_URL="postgresql://sudoku_user:your_secure_password@localhost:5432/sudoku_db",SECRET_KEY="your-secret-key",DEBUG="False",ALLOWED_HOSTS="your_domain.com"
-```
 
-Create log directory and start:
-```bash
-sudo mkdir -p /var/log/sudoku
-sudo chown sudoku:sudoku /var/log/sudoku
-sudo supervisorctl reread
-sudo supervisorctl update
-sudo supervisorctl start sudoku
-```
 
-### Step 10: Configure Nginx
 
-Create Nginx config:
-```bash
-sudo nano /etc/nginx/sites-available/sudoku
-```
 
-Add:
-```nginx
-server {
-    listen 80;
-    server_name your_domain.com your_server_ip;
 
-    location /static/ {
-        alias /var/www/sudoku/staticfiles/;
-    }
 
-    location / {
-        proxy_pass http://unix:/var/www/sudoku/sudoku.sock;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
 
-Enable site and restart Nginx:
-```bash
-sudo ln -s /etc/nginx/sites-available/sudoku /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-```
 
-### Step 11: Configure Firewall
-
-```bash
-sudo ufw allow 'Nginx Full'
-sudo ufw allow OpenSSH
-sudo ufw enable
-```
-
-### Step 12: Setup SSL with Let's Encrypt (Optional but Recommended)
-
-```bash
-sudo apt install certbot python3-certbot-nginx -y
-sudo certbot --nginx -d your_domain.com
-```
-
-### Useful Commands
-
-Check application status:
-```bash
-sudo supervisorctl status sudoku
-```
-
-View logs:
-```bash
-sudo tail -f /var/log/sudoku/gunicorn.log
-```
-
-Restart application:
-```bash
-sudo supervisorctl restart sudoku
-```
-
-Update application:
-```bash
-cd /var/www/sudoku
-sudo -u sudoku git pull
-sudo -u sudoku ./venv/bin/pip install -r requirements.txt
-sudo -u sudoku ./venv/bin/python manage.py migrate
-sudo -u sudoku ./venv/bin/python manage.py collectstatic --noinput
-sudo supervisorctl restart sudoku
-```
-
-### Troubleshooting
-
-**502 Bad Gateway**: Check if Gunicorn is running:
-```bash
-sudo supervisorctl status sudoku
-sudo tail -50 /var/log/sudoku/gunicorn.log
-```
-
-**Static files not loading**: Ensure collectstatic was run and Nginx config points to correct path.
-
-**Database connection error**: Verify PostgreSQL is running and credentials are correct:
-```bash
-sudo systemctl status postgresql
-```
-
-## License
-
-MIT License - feel free to use and modify for your own projects.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Author
-
-Built with Django and love for puzzle games.

@@ -288,29 +288,6 @@ python manage.py dbshell
 ```
 ---
 
-## Backup and Restore
-
-### Backup
-
-```bash
-# SQL dump
-docker-compose exec db pg_dump -U sudoku sudoku > backup.sql
-
-# Compressed
-docker-compose exec db pg_dump -U sudoku sudoku | gzip > backup.sql.gz
-```
-
-### Restore
-
-```bash
-# From SQL file
-cat backup.sql | docker-compose exec -T db psql -U sudoku -d sudoku
-
-# From compressed
-gunzip -c backup.sql.gz | docker-compose exec -T db psql -U sudoku -d sudoku
-```
-
----
 
 ## Statistics Queries
 

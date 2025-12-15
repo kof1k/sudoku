@@ -286,20 +286,6 @@ python manage.py shell
 # Database shell (SQL)
 python manage.py dbshell
 ```
-
-### Docker Commands
-
-```bash
-# Access PostgreSQL in Docker
-docker-compose exec db psql -U sudoku -d sudoku
-
-# Run migrations in Docker
-docker-compose exec web python manage.py migrate
-
-# Create superuser in Docker
-docker-compose exec web python manage.py createsuperuser
-```
-
 ---
 
 ## Backup and Restore

@@ -1,290 +1,536 @@
-## Features
+# Веб-гра "Судоку"
 
-### Authentication System
-- User registration with email
-- Secure login/logout
-- Session management
+## Шкільний проект з інформатики
 
-### Sudoku Game
-- **Three Difficulty Levels**: Easy, Medium, Hard
-- **Smart Highlighting**: Highlights all instances of the same number when selecting a cell
-- **Notes/Pencil Marks**: Toggle notes mode to add multiple candidates per cell
-- **Hint System**: Limited to 3 hints per game
-- **Mistake Tracking**: 3 mistakes allowed before game over
-- **Auto-Win Detection**: Automatically detects when puzzle is solved
-- **Timer**: Tracks your solving time
-- **Auto-Hide Numbers**: Number buttons disappear when all 9 instances are placed
+**Тип проекту:** Веб-додаток
+**Технології:** Python, Django, PostgreSQL, JavaScript, HTML5, CSS3
+**Рік виконання:** 2024-2025
 
-### Leaderboard
-- Global rankings by difficulty
-- Tracks completion time and hints used
-- Shows player usernames and achievements
+---
 
-### Chat System
-- Real-time player chat
-- Auto-refresh messages
-- Timestamps for each message
+## Зміст
 
-## Tech Stack
+1. [Вступ](#вступ)
+2. [Мета та завдання проекту](#мета-та-завдання-проекту)
+3. [Теоретична частина](#теоретична-частина)
+4. [Функціональні можливості](#функціональні-можливості)
+5. [Технології та інструменти](#технології-та-інструменти)
+6. [Структура проекту](#структура-проекту)
+7. [Опис модулів](#опис-модулів)
+8. [Інструкція з встановлення](#інструкція-з-встановлення)
+9. [Інструкція користувача](#інструкція-користувача)
+10. [Висновки](#висновки)
 
-- **Backend**: Django 5.0
-- **Database**: PostgreSQL
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Design**: Minimalist dark theme with red accents
+---
 
-## Design
+## Вступ
 
-The application follows a "samurai style" minimalist aesthetic:
-- **Background**: Pure black (#000000)
-- **Primary Color**: Dark red (#8B0000)
-- **Hover Effects**: Bright red (#FF0000)
-- **Card Background**: Dark gray (#1A1A1A)
-- **Text**: White (#FFFFFF)
+### Що таке Судоку?
 
-## Installation
+**Судоку** (яп. 数独, "одинокі числа") — це логічна головоломка-гра з числами. Класичне судоку складається з квадратної таблиці 9×9, розділеної на 9 квадратів 3×3 (так звані "регіони" або "блоки").
 
-### Prerequisites
-- Python 3.11+
-- PostgreSQL database
+### Правила гри
 
-### Setup
+1. Поле розміром 9×9 клітинок розділене на 9 квадратів 3×3
+2. В кожній клітинці має бути число від 1 до 9
+3. Кожне число може зустрічатися тільки один раз:
+   - У кожному рядку
+   - У кожному стовпці
+   - У кожному квадраті 3×3
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/sudoku-game.git
-cd sudoku-game
+### Історія судоку
+
+Судоку з'явилося в кінці 1970-х років в Японії. Гра стала популярною в усьому світі на початку 2000-х років. Назва "судоку" походить від японського виразу "Suuji wa dokushin ni kagiru" (数字は独身に限る), що означає "цифри мають бути одиничними".
+
+---
+
+## Мета та завдання проекту
+
+### Мета проекту
+
+Розробити інтерактивний веб-додаток для гри в судоку з можливістю:
+- Генерації нових головоломок різної складності
+- Відстеження прогресу гравців
+- Соціальної взаємодії між користувачами
+
+### Завдання проекту
+
+1. **Вивчити** алгоритми генерації та розв'язання судоку
+2. **Розробити** серверну частину на фреймворку Django
+3. **Створити** інтуїтивно зрозумілий інтерфейс користувача
+4. **Реалізувати** систему авторизації та реєстрації
+5. **Впровадити** таблицю лідерів та систему чату
+6. **Забезпечити** адаптивний дизайн для мобільних пристроїв
+
+### Актуальність проекту
+
+- Судоку розвиває логічне мислення та концентрацію
+- Веб-версія доступна з будь-якого пристрою
+- Соціальні функції підвищують мотивацію гравців
+- Проект демонструє сучасні технології веб-розробки
+
+---
+
+## Теоретична частина
+
+### Алгоритм генерації судоку
+
+Для генерації головоломок використовується **алгоритм backtracking** (алгоритм з поверненням):
+
+#### Етапи генерації:
+
+1. **Створення повної дошки**
+   - Ініціалізація порожньої сітки 9×9
+   - Послідовне заповнення клітинок числами 1-9
+   - Перевірка валідності кожного числа
+   - Якщо число не підходить — повернення назад (backtracking)
+
+2. **Створення головоломки**
+   - Копіювання повної дошки
+   - Випадкове видалення клітинок залежно від складності:
+     - **Easy** (Легко): видаляється 30 клітинок (залишається 51)
+     - **Medium** (Середньо): видаляється 40 клітинок (залишається 41)
+     - **Hard** (Складно): видаляється 50 клітинок (залишається 31)
+
+#### Псевдокод алгоритму:
+
+```
+Функція ЗАПОВНИТИ_ДОШКУ(дошка):
+    Для кожної клітинки (i, j):
+        Якщо клітинка порожня:
+            Для кожного числа від 1 до 9 (випадковий порядок):
+                Якщо число ВАЛІДНЕ(дошка, i, j, число):
+                    Поставити число в клітинку
+                    Якщо ЗАПОВНИТИ_ДОШКУ(дошка) = УСПІХ:
+                        Повернути УСПІХ
+                    Очистити клітинку (backtracking)
+            Повернути НЕВДАЧА
+    Повернути УСПІХ
+
+Функція ВАЛІДНЕ(дошка, рядок, колонка, число):
+    Перевірити чи число НЕ в рядку
+    Перевірити чи число НЕ в колонці
+    Перевірити чи число НЕ в блоці 3×3
+    Повернути результат
 ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+### Архітектура MVC
 
-3. Set up environment variables:
-```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/sudoku"
-export SECRET_KEY="your-secret-key"
-export SENDGRID_API_KEY="your-sendgrid-api-key"
-export SENDGRID_FROM_EMAIL="noreply@yourdomain.com"
-```
-
-4. Run migrations:
-```bash
-python manage.py migrate
-```
-
-5. Start the server:
-```bash
-python manage.py runserver 0.0.0.0:5000
-```
-
-6. Open http://localhost:5000 in your browser
-
-## Project Structure
+Проект побудований на архітектурному шаблоні **MVC** (Model-View-Controller):
 
 ```
-sudoku-game/
-├── django_project/          # Django project configuration
-│   ├── settings.py          # Main settings
-│   ├── urls.py              # Root URL routing
-│   └── wsgi.py              # WSGI configuration
+┌─────────────────────────────────────────────────────────┐
+│                    Користувач                           │
+└─────────────────────┬───────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────┐
+│              Controller (Views)                         │
+│  - Обробка HTTP запитів                                │
+│  - Бізнес-логіка                                        │
+│  - Взаємодія з моделями                                 │
+└──────────┬────────────────────────────┬─────────────────┘
+           │                            │
+           ▼                            ▼
+┌─────────────────────┐    ┌─────────────────────────────┐
+│   Model (Моделі)    │    │      View (Шаблони)         │
+│  - GameResult       │    │  - HTML шаблони             │
+│  - ChatMessage      │    │  - CSS стилі                │
+│  - User             │    │  - JavaScript               │
+└──────────┬──────────┘    └─────────────────────────────┘
+           │
+           ▼
+┌─────────────────────┐
+│    База даних       │
+│    (PostgreSQL)     │
+└─────────────────────┘
+```
+
+### Клієнт-серверна архітектура
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                         КЛІЄНТ (Браузер)                         │
+├──────────────────────────────────────────────────────────────────┤
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐                  │
+│  │   HTML5    │  │   CSS3     │  │ JavaScript │                  │
+│  │  Шаблони   │  │   Стилі    │  │   Логіка   │                  │
+│  └────────────┘  └────────────┘  └────────────┘                  │
+│                                                                  │
+│  Файли: game.html, sudoku.js, chat.js, style.css                │
+└────────────────────────────┬─────────────────────────────────────┘
+                             │ HTTP (JSON)
+                             ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                        СЕРВЕР (Django)                           │
+├──────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐   │
+│  │   URL Router    │  │     Views       │  │     Models      │   │
+│  │   (urls.py)     │  │   (views.py)    │  │   (models.py)   │   │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘   │
+│                                                                  │
+│  Файли: views.py, models.py, urls.py                            │
+└────────────────────────────┬─────────────────────────────────────┘
+                             │ SQL (ORM)
+                             ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                    БАЗА ДАНИХ (PostgreSQL)                       │
+├──────────────────────────────────────────────────────────────────┤
+│  Таблиці: auth_user, sudoku_gameresult, sudoku_chatmessage       │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Функціональні можливості
+
+### 1. Система авторизації
+
+| Функція | Опис |
+|---------|------|
+| Реєстрація | Створення нового акаунту з username, email та паролем |
+| Вхід | Авторизація за username та паролем |
+| Вихід | Завершення сесії користувача |
+| Сесії | Збереження стану авторизації між запитами |
+
+### 2. Гра в Судоку
+
+| Функція | Опис |
+|---------|------|
+| Генерація | Автоматичне створення нових головоломок |
+| Складність | Три рівні: Easy, Medium, Hard |
+| Таймер | Відстеження часу розв'язання |
+| Помилки | Лічильник помилок (максимум 3) |
+| Підказки | Система підказок (максимум 3) |
+| Нотатки | Режим для позначок можливих варіантів |
+| Підсвічування | Виділення пов'язаних клітинок |
+| Автоперемога | Автоматичне визначення розв'язання |
+
+### 3. Таблиця лідерів
+
+| Функція | Опис |
+|---------|------|
+| Рейтинг | Топ-50 гравців за часом |
+| Фільтри | Сортування за складністю |
+| Статистика | Час, підказки, дата завершення |
+
+### 4. Чат гравців
+
+| Функція | Опис |
+|---------|------|
+| Повідомлення | Відправка текстових повідомлень |
+| Оновлення | Автоматичне оновлення кожні 3 секунди |
+| Історія | Збереження останніх 50 повідомлень |
+
+---
+
+## Технології та інструменти
+
+### Backend (Серверна частина)
+
+| Технологія | Версія | Призначення |
+|------------|--------|-------------|
+| **Python** | 3.10+ | Мова програмування |
+| **Django** | 5.0 | Веб-фреймворк |
+| **PostgreSQL** | 15+ | База даних |
+| **psycopg2** | 2.9.11 | Адаптер PostgreSQL для Python |
+| **dj-database-url** | 3.0.1 | Парсер URL бази даних |
+
+### Frontend (Клієнтська частина)
+
+| Технологія | Призначення |
+|------------|-------------|
+| **HTML5** | Семантична розмітка сторінок |
+| **CSS3** | Стилізація та анімації |
+| **JavaScript** | Інтерактивність та логіка гри |
+
+### Інструменти розробки
+
+| Інструмент | Призначення |
+|------------|-------------|
+| **Git** | Система контролю версій |
+| **Poetry** | Управління залежностями Python |
+| **Ruff** | Лінтер коду |
+| **VS Code** | Редактор коду |
+
+---
+
+## Структура проекту
+
+```
+sudoku/
+├── manage.py                 # Django CLI утиліта
+├── pyproject.toml            # Конфігурація проекту
+├── poetry.lock               # Версії залежностей
 │
-├── sudoku/                  # Main application
-│   ├── models.py            # Database models
-│   ├── views.py             # View functions
-│   ├── urls.py              # App URL patterns
-│   └── admin.py             # Admin configuration
+├── django_project/           # Головна конфігурація Django
+│   ├── __init__.py
+│   ├── settings.py           # Налаштування проекту
+│   ├── urls.py               # Головна маршрутизація
+│   ├── wsgi.py               # WSGI конфігурація
+│   └── asgi.py               # ASGI конфігурація
 │
-├── templates/               # HTML templates
-│   ├── base.html            # Base layout with navigation
-│   ├── home.html            # Landing page
-│   ├── game.html            # Sudoku game board
-│   ├── leaderboard.html     # Rankings page
-│   ├── chat.html            # Player chat
-│   └── registration/        # Auth templates
+├── sudoku/                   # Основний додаток
+│   ├── __init__.py
+│   ├── apps.py               # Конфігурація додатку
+│   ├── models.py             # Моделі бази даних
+│   ├── views.py              # Обробники запитів
+│   ├── urls.py               # Маршрути додатку
+│   ├── admin.py              # Адміністрування
+│   ├── tests.py              # Тести
+│   └── migrations/           # Міграції бази даних
+│
+├── templates/                # HTML шаблони
+│   ├── base.html             # Базовий шаблон
+│   ├── home.html             # Головна сторінка
+│   ├── game.html             # Гральна сторінка
+│   ├── leaderboard.html      # Таблиця лідерів
+│   ├── chat.html             # Чат гравців
+│   └── registration/         # Шаблони авторизації
 │       ├── login.html
 │       └── register.html
 │
-├── static/                  # Static assets
+├── static/                   # Статичні файли
 │   ├── css/
-│   │   └── style.css        # All styles
+│   │   └── style.css         # Всі стилі (824 рядки)
 │   └── js/
-│       ├── main.js          # Common scripts
-│       ├── sudoku.js        # Game logic
-│       └── chat.js          # Chat functionality
+│       ├── main.js           # Загальний функціонал
+│       ├── sudoku.js         # Логіка гри (394 рядки)
+│       └── chat.js           # Функціонал чату
 │
-├── manage.py                # Django CLI
-└── README.md                # This file
+└── docs/                     # Документація
+    ├── README.md             # Цей файл
+    ├── Architecture.md       # Архітектура проекту
+    ├── Algorithms.md         # Опис алгоритмів
+    ├── API.md                # Документація API
+    ├── Database.md           # Структура БД
+    └── Installation.md       # Інструкція встановлення
 ```
 
-## Database Models
+---
 
-### GameResult
-Stores completed game records:
-- `user` - Foreign key to User
-- `difficulty` - Game difficulty (easy/medium/hard)
-- `time_seconds` - Completion time in seconds
-- `hints_used` - Number of hints used (0-3)
-- `completed_at` - Timestamp
+## Опис модулів
 
-### ChatMessage
-Stores chat messages:
-- `user` - Foreign key to User
-- `message` - Message text
-- `created_at` - Timestamp
+### models.py — Моделі даних
 
-## API Endpoints
+#### Клас `GameResult`
+Зберігає результати завершених ігор.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Home page |
-| `/game/<difficulty>/` | GET | Start new game |
-| `/game/hint/` | POST | Get hint for selected cell |
-| `/game/save-result/` | POST | Save completed game |
-| `/leaderboard/` | GET | View rankings |
-| `/chat/` | GET | Chat page |
-| `/chat/send/` | POST | Send message |
-| `/chat/messages/` | GET | Get recent messages |
-| `/register/` | GET/POST | User registration |
-| `/login/` | GET/POST | User login |
-| `/logout/` | POST | User logout |
-
-## Game Controls
-
-### Desktop
-- **Click** on a cell to select it
-- **Click** a number button to fill the cell
-- **Click X** to clear a cell
-- **Click Notes** to toggle pencil marks mode
-- **Click Hint** to reveal correct number (limited to 3)
-
-### Mobile
-- Same as desktop, optimized touch interface
-- Responsive grid sizing for smaller screens
-
-## Screenshots
-
-The game features:
-- Clean hamburger navigation menu
-- Centered game board with red border accents
-- Number pad below the board
-- Game stats showing time, mistakes, and hints
-
-## Deployment on Ubuntu VPS
-
-### Step 1: Server Setup
-
-Connect to your VPS via SSH:
-```bash
-ssh root@your_server_ip
+```python
+class GameResult(models.Model):
+    user = ForeignKey(User)           # Гравець
+    difficulty = CharField()          # Складність: easy/medium/hard
+    time_seconds = IntegerField()     # Час розв'язання (секунди)
+    hints_used = IntegerField()       # Використано підказок (0-3)
+    completed = BooleanField()        # Чи завершено
+    created_at = DateTimeField()      # Дата завершення
 ```
 
-Update system packages:
-```bash
-sudo apt update && sudo apt upgrade -y
+#### Клас `ChatMessage`
+Зберігає повідомлення чату.
+
+```python
+class ChatMessage(models.Model):
+    user = ForeignKey(User)           # Автор
+    message = TextField()             # Текст (до 500 символів)
+    created_at = DateTimeField()      # Час відправки
 ```
 
-### Step 2: Install Required Software
+#### Клас `SudokuGenerator`
+Генератор головоломок з методами:
+- `generate_full_board()` — генерація повної дошки
+- `create_puzzle(difficulty)` — створення головоломки
+- `check_solution()` — перевірка рішення
 
-Install Python, PostgreSQL, Nginx, and other dependencies:
+### views.py — Обробники запитів
+
+| Функція | Метод | URL | Опис |
+|---------|-------|-----|------|
+| `home` | GET | `/` | Головна сторінка |
+| `register_view` | GET/POST | `/register/` | Реєстрація |
+| `login_view` | GET/POST | `/login/` | Вхід |
+| `logout_view` | GET | `/logout/` | Вихід |
+| `game_view` | GET | `/game/` | Початок гри |
+| `submit_game` | POST | `/game/submit/` | Збереження результату |
+| `get_hint` | GET | `/game/hint/` | Отримання підказки |
+| `leaderboard_view` | GET | `/leaderboard/` | Таблиця лідерів |
+| `chat_view` | GET | `/chat/` | Сторінка чату |
+| `send_message` | POST | `/chat/send/` | Відправка повідомлення |
+| `get_messages` | GET | `/chat/messages/` | Отримання повідомлень |
+
+### sudoku.js — Логіка гри
+
+| Функція | Опис |
+|---------|------|
+| `buildBoard()` | Побудова DOM структури дошки 9×9 |
+| `handleCellClick()` | Обробка кліку на клітинку |
+| `enterNumber()` | Введення числа з валідацією |
+| `updateHighlighting()` | Оновлення підсвічування клітинок |
+| `checkWin()` | Перевірка умови перемоги |
+| `showWin()` | Відображення модального вікна перемоги |
+| `showGameOver()` | Відображення модального вікна програшу |
+| `toggleNotesMode()` | Перемикання режиму нотаток |
+| `getHint()` | Запит підказки з сервера |
+| `startTimer()` | Запуск таймера |
+| `navigateCell()` | Навігація клавіатурою |
+
+---
+
+## Інструкція з встановлення
+
+### Системні вимоги
+
+- **Python** 3.10 або новіший
+- **PostgreSQL** 15 або новіший
+- **Git** для клонування репозиторію
+
+### Крок 1: Клонування репозиторію
+
 ```bash
-sudo apt install python3 python3-pip python3-venv postgresql postgresql-contrib nginx supervisor git -y
+git clone https://github.com/username/sudoku.git
+cd sudoku
 ```
 
-### Step 3: Create PostgreSQL Database
+### Крок 2: Встановлення залежностей
 
 ```bash
+# Встановлення Poetry (якщо не встановлено)
+pip install poetry
+
+# Встановлення залежностей проекту
+poetry install
+```
+
+### Крок 3: Налаштування бази даних
+
+```bash
+# Вхід в PostgreSQL
 sudo -u postgres psql
-```
 
-In PostgreSQL shell:
-```sql
+# Створення бази даних
 CREATE DATABASE sudoku_db;
-CREATE USER sudoku_user WITH PASSWORD 'your_secure_password';
-ALTER ROLE sudoku_user SET client_encoding TO 'utf8';
-ALTER ROLE sudoku_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE sudoku_user SET timezone TO 'UTC';
+CREATE USER sudoku_user WITH PASSWORD 'password';
 GRANT ALL PRIVILEGES ON DATABASE sudoku_db TO sudoku_user;
 \q
 ```
 
-### Step 4: Create Application User
+### Крок 4: Налаштування змінних середовища
 
 ```bash
-sudo adduser --system --group sudoku
-sudo mkdir -p /var/www/sudoku
-sudo chown sudoku:sudoku /var/www/sudoku
+export DATABASE_URL="postgresql://sudoku_user:password@localhost:5432/sudoku_db"
+export SECRET_KEY="your-secret-key-here"
 ```
 
-### Step 5: Clone and Setup Application
+### Крок 5: Застосування міграцій
 
 ```bash
-cd /var/www/sudoku
-sudo -u sudoku git clone https://github.com/yourusername/sudoku-game.git .
+python manage.py migrate
 ```
 
-Create virtual environment:
-```bash
-sudo -u sudoku python3 -m venv venv
-sudo -u sudoku ./venv/bin/pip install --upgrade pip
-sudo -u sudoku ./venv/bin/pip install django psycopg2-binary gunicorn dj-database-url
-```
-
-### Step 6: Configure Environment Variables
-
-Create environment file:
-```bash
-sudo nano /var/www/sudoku/.env
-```
-
-Add the following:
-```
-DATABASE_URL=postgresql://sudoku_user:your_secure_password@localhost:5432/sudoku_db
-SECRET_KEY=your-very-long-random-secret-key-here
-DEBUG=False
-ALLOWED_HOSTS=your_domain.com,your_server_ip
-SENDGRID_API_KEY=your-sendgrid-api-key
-SENDGRID_FROM_EMAIL=noreply@yourdomain.com
-```
-
-Create a script to load environment:
-```bash
-sudo nano /var/www/sudoku/load_env.sh
-```
+### Крок 6: Запуск сервера
 
 ```bash
-#!/bin/bash
-export $(cat /var/www/sudoku/.env | xargs)
+python manage.py runserver 0.0.0.0:5000
 ```
 
-### Step 7: Update Django Settings for Production
+### Крок 7: Відкриття в браузері
 
-Edit `django_project/settings.py` and ensure:
-```python
-import os
+Відкрийте http://localhost:5000
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+---
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-```
+## Інструкція користувача
 
-### Step 8: Run Migrations and Collect Static
+### Реєстрація та вхід
 
-```bash
-cd /var/www/sudoku
-source .env
-sudo -u sudoku ./venv/bin/python manage.py migrate
-sudo -u sudoku ./venv/bin/python manage.py collectstatic --noinput
-```
+1. Натисніть кнопку **Register** на головній сторінці
+2. Введіть ім'я користувача, email (опціонально) та пароль
+3. Після реєстрації увійдіть за допомогою кнопки **Login**
 
+### Початок гри
 
+1. На головній сторінці виберіть рівень складності:
+   - **Easy** — для початківців (51 заповнена клітинка)
+   - **Medium** — середній рівень (41 заповнена клітинка)
+   - **Hard** — для досвідчених (31 заповнена клітинка)
+2. Натисніть на обраний рівень
 
+### Управління грою
 
+#### Введення чисел
+1. Натисніть на порожню клітинку
+2. Виберіть число на панелі знизу (1-9)
+3. Для видалення числа натисніть **X**
 
+#### Режим нотаток
+1. Натисніть кнопку **Notes** для активації
+2. Додавайте можливі варіанти в клітинку
+3. Нотатки автоматично видаляються при введенні числа
 
+#### Підказки
+1. Натисніть кнопку **Hint** для підказки
+2. Доступно лише 3 підказки за гру
+3. Підказка показує правильне число для вибраної клітинки
 
+#### Помилки
+- При введенні неправильного числа додається помилка
+- Максимум 3 помилки — потім гра закінчується програшем
 
+### Таблиця лідерів
 
+1. Перейдіть до **Leaderboard** через меню
+2. Перегляньте топ-50 гравців
+3. Фільтруйте за складністю: All / Easy / Medium / Hard
 
+### Чат
 
+1. Перейдіть до **Chat** через меню
+2. Введіть повідомлення та натисніть **Send**
+3. Повідомлення автоматично оновлюються кожні 3 секунди
+
+---
+
+## Висновки
+
+### Результати проекту
+
+У результаті виконання проекту було створено повнофункціональний веб-додаток для гри в судоку з наступними особливостями:
+
+1. **Автоматична генерація** — алгоритм backtracking створює унікальні головоломки
+2. **Три рівні складності** — від легкого до складного
+3. **Система авторизації** — реєстрація та вхід користувачів
+4. **Таблиця лідерів** — мотивація через змагання
+5. **Соціальний чат** — спілкування між гравцями
+6. **Адаптивний дизайн** — підтримка мобільних пристроїв
+7. **Інтуїтивний інтерфейс** — легкість використання
+
+### Набуті навички
+
+- Розробка веб-додатків на Django
+- Робота з базами даних PostgreSQL
+- Створення інтерактивних інтерфейсів на JavaScript
+- Застосування алгоритмів (backtracking)
+- Проектування клієнт-серверної архітектури
+
+### Можливості для розвитку
+
+- Додавання нових режимів гри (турніри, мультиплеєр)
+- Інтеграція з соціальними мережами
+- Статистика та досягнення гравців
+- Мобільний додаток
+
+---
+
+## Використані джерела
+
+1. Django Documentation — https://docs.djangoproject.com/
+2. PostgreSQL Documentation — https://www.postgresql.org/docs/
+3. MDN Web Docs — https://developer.mozilla.org/
+4. Sudoku Algorithms — https://en.wikipedia.org/wiki/Sudoku_solving_algorithms
+5. CSS Tricks — https://css-tricks.com/
+
+---
+
+**Автор проекту:** [Ваше ім'я]
+**Дата завершення:** 2024-2025
+**Ліцензія:** MIT License
